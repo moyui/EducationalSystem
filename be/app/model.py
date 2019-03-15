@@ -1,4 +1,4 @@
-from . import db
+from ext import db
 
 # 用户信息
 
