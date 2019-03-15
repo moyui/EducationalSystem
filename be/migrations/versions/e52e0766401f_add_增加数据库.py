@@ -1,8 +1,8 @@
-"""add 数据库
+"""add 增加数据库
 
-Revision ID: f63780ec39c9
+Revision ID: e52e0766401f
 Revises: 
-Create Date: 2019-03-14 23:43:30.549306
+Create Date: 2019-03-15 15:46:58.727847
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f63780ec39c9'
+revision = 'e52e0766401f'
 down_revision = None
 branch_labels = None
 depends_on = None
