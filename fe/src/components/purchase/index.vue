@@ -9,7 +9,8 @@
         </div>
       </div>
       <p class="purchase__price">
-        课程价格<i class="purchase__price-unit">￥</i>
+        课程价格
+        <i class="purchase__price-unit">￥</i>
         <i class="purchase__price-num">{{price}}</i>
       </p>
     </div>
@@ -49,17 +50,18 @@ export default {
     },
     confirm() {
       return postPurchase(this.id)
-        .then(data =>
+        .then(data => {
           this.$message({
             message: data.message,
             type: "success"
-          })
-        )
+          });
+          window.location.reload();
+        })
         .catch(rej => {
           this.$store.commit("SET_ORDER_VISIBLE", false);
           // 跳转支付单独页
           if (rej.data.status == 3) {
-            this.$router.push({ path: '/payment'});
+            this.$router.push({ path: "/payment" });
           } else {
             this.$message({
               message: rej.data.message,

@@ -2,8 +2,10 @@ from flask import request
 from . import video
 from ..router import Response_headers
 from ..decorator import is_login
-from ..model import UserOrder, VideoInfo, CourseInfo
+from ..model import UserOrder, VideoInfo, CourseInfo, UserProgress
 from .. import db
+
+import json
 
 @video.route('/video', methods=['GET'])
 @is_login
@@ -56,3 +58,31 @@ def watch(userid):
                 return resp
     else:
         return Response_headers(405, {})
+
+
+@video.route('/progress', methods=['POST'])
+@is_login
+def progress(userid):
+    if request.method == 'POST':
+        if userid is not None:
+            try:
+                progressinfo = json.loads(request.get_data().decode("utf-8"))
+                videoid = progressinfo['videoid']
+                courseid = progressinfo['courseid']
+
+                progressQ = UserProgress.query.filter_by(
+                    userid=int(userid), videoid=int(videoid), courseid=int(courseid)).first()
+                if progressQ is not None:
+                    return Response_headers(200, {'status': 0})
+                else:
+                    progressA = UserProgress(
+                        videoid=int(videoid),
+                        userid=int(userid),
+                        courseid=int(courseid)
+                    )
+                    db.session.add(progressA)
+                    db.session.commit()
+                    return Response_headers(201, {'status': 1})
+            except Exception as e:
+                print(e)
+                return Response_headers(500, {})

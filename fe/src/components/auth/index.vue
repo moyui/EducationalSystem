@@ -1,9 +1,9 @@
 <template>
   <el-container>
-    <el-dialog title="登录" center width="30%" :visible.sync="loginVisible" class="dialog">
+    <el-dialog title="登录" center width="30%" :visible="loginVisible" class="dialog" @close="cancelLogin">
       <el-form label-width="80px" :model="info">
-        <el-form-item label="手机号">
-          <el-input v-model="info.phone" placeholder="请输入手机号" suffix-icon="el-icon-phone"></el-input>
+        <el-form-item label="邮箱">
+          <el-input v-model="info.mail" placeholder="请输入邮箱" suffix-icon="el-icon-phone"></el-input>
         </el-form-item>
         <el-form-item label="密码">
           <el-input v-model="info.password" placeholder="请输入密码" show-password></el-input>
@@ -16,16 +16,19 @@
       </span>
     </el-dialog>
 
-    <el-dialog title="注册" center width="30%" :visible.sync="registerVisible" class="dialog">
+    <el-dialog title="注册" center width="30%" :visible="registerVisible" class="dialog" @close="cancelRegister">
       <el-form label-width="80px" :model="info">
-        <el-form-item label="手机号">
-          <el-input v-model="info.phone" placeholder="请输入手机号" suffix-icon="el-icon-phone"></el-input>
+        <el-form-item label="邮箱">
+          <el-input v-model="info.mail" placeholder="请输入邮箱" suffix-icon="el-icon-phone"></el-input>
         </el-form-item>
         <el-form-item label="密码">
           <el-input v-model="info.password" placeholder="请输入密码" show-password></el-input>
         </el-form-item>
         <el-form-item label="确认密码">
           <el-input v-model="info.checkPassword" placeholder="请确认密码" show-password></el-input>
+        </el-form-item>
+        <el-form-item label="用户名">
+           <el-input v-model="info.userName" placeholder="请输入用户名"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -42,9 +45,10 @@ export default {
   data() {
     return {
       info: {
-        phone: "",
+        mail: "",
         password: "",
-        checkPassword: ""
+        checkPassword: "",
+        userName: ""
       }
     };
   },
@@ -74,7 +78,7 @@ export default {
     loginBack(data) {
       if (data.status == 0)
         this.$message({
-          message: "登录失败, 手机号错误或密码错误",
+          message: "登录失败, 邮箱错误或密码错误",
           type: "error"
         });
       if (data.status == 1) {

@@ -10,12 +10,12 @@
       <div class="view__header_meta">
         <div class="view__title-wrap">
           <h3 class="view__title">{{view.basic.name}}</h3>
-          <el-rate v-model="rateValue" allow-half show-score @change="rateChange"></el-rate>
+          <!-- <el-rate v-model="rateValue" allow-half show-score @change="rateChange"></el-rate> -->
         </div>
         <div class="view__buy">
           <span>购买人数：{{view.basic.total}}人</span>
           <span class="view__favour">好评度：{{favourRate}}</span>
-          <el-button class="view__favour el-icon-star-off" size="small">收藏</el-button>
+          <!-- <el-button class="view__favour el-icon-star-off" size="small">收藏</el-button> -->
         </div>
         <p class="view__info">{{view.basic.info}}</p>
         <p class="view__extra-info">{{view.basic.extra_info}}</p>
@@ -31,6 +31,12 @@
             plain
             @click="goToVideo(view.detail.menu[0].video[0].id, view.basic.id)"
           >学习课程</el-button>
+          <el-button
+            v-if="canTest"
+            type="warning"
+            plain
+            @click="goToVideo(view.detail.menu[0].video[0].id, view.basic.id)"
+          >开始测试</el-button>
           <el-button>咨询</el-button>
         </div>
       </div>
@@ -68,11 +74,56 @@
               </div>
               <el-button type="primary" class="launch-comment" @click="requestCommentPost">发表评论</el-button>
             </div>
+            <template v-if="commentList.length > 0 && isLogin">
+              <h5>您的评论</h5>
+              <el-card>
+                <div class="comment-content">
+                  <span class="comment-username">您</span>
+                  <div
+                    class="comment-usercontent"
+                    v-html="commentList[0].content"
+                  >{{commentList[0].content}}</div>
+                  <span class="comment-date">发表时间： {{getLocalTime(commentList[0].createdate)}}</span>
+                  <div class="comment-add-content" v-if="commentList[0].addcontent">
+                    <h6>您的追评</h6>
+                    <div
+                      class="comment-usercontent"
+                      v-html="commentList[0].addcontent"
+                    >{{commentList[0].addcontent}}</div>
+                    <span class="comment-date">发表时间： {{getLocalTime(commentList[0].modifydate)}}</span>
+                  </div>
+                  <template v-else>
+                    <el-button @click="activeAddComment" v-if="!addCommentStatus">追评</el-button>
+                    <div class="comment" v-if="addCommentStatus">
+                      <div class="editor__bound" ref="editorBound">
+                        <quillEditor
+                          v-model="addComment"
+                          ref="myQuillEditor"
+                          :options="addEditorOption"
+                          class="editor"
+                        ></quillEditor>
+                      </div>
+                      <el-button
+                        type="primary"
+                        class="launch-comment"
+                        @click="requestAddComment(commentList[0].id)"
+                      >发表追评</el-button>
+                    </div>
+                  </template>
+                </div>
+              </el-card>
+              <el-divider></el-divider>
+            </template>
             <el-card v-for="item in commentList" :key="item.id">
               <div class="comment-content">
                 <span class="comment-username">{{item.username}}</span>
                 <div class="comment-usercontent" v-html="item.content">{{item.content}}</div>
                 <span class="comment-date">发表时间： {{getLocalTime(item.createdate)}}</span>
+                <div class="comment-add-content" v-if="item.addcontent">
+                  <h6>追评</h6>
+                  <div class="comment-usercontent" v-html="item.addcontent">{{item.addcontent}}</div>
+                  <span class="comment-date">发表时间： {{getLocalTime(item.modifydate)}}</span>
+                </div>
               </div>
             </el-card>
           </div>
@@ -115,7 +166,14 @@
   </el-main>
 </template>
 <script>
-import { getView, postOrder, getComment, postComment } from "./api";
+import {
+  getView,
+  postOrder,
+  getComment,
+  postComment,
+  postAddComment,
+  getCanTest
+} from "./api";
 import { setTimeout } from "timers";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
@@ -132,6 +190,7 @@ export default {
       activeIndex: "1",
       rateValue: null,
       comment: "",
+      addComment: "",
       editorOption: {
         bounds: this.$refs.editorBound || document.body,
         placeholder: "请输入您的评论",
@@ -146,17 +205,37 @@ export default {
           ]
         }
       },
-      commentList: []
+      addEditorOption: {
+        bounds: this.$refs.editorBound || document.body,
+        placeholder: "请输入您的追评",
+        themes: "Snow",
+        modules: {
+          toolbar: [
+            ["blockquote", "code-block"],
+            [{ header: 1 }, { header: 2 }],
+            [{ indent: "-1" }, { indent: "+1" }],
+            [{ script: "sub" }, { script: "super" }],
+            ["clean"]
+          ]
+        }
+      },
+      commentList: [],
+      addCommentStatus: false,
+      canTest: false
     };
   },
   created() {
     this.requestView();
     this.requestCommentGet();
+    this.requestCanTest();
   },
   computed: {
     favourRate() {
       if (this.view.basic.total == 0) return "暂无数据";
       else return this.view.basic.favour / this.view.basic.total + "%";
+    },
+    isLogin() {
+      return this.$store.state.login;
     }
   },
   methods: {
@@ -203,6 +282,36 @@ export default {
             });
           }
         });
+    },
+
+    activeAddComment() {
+      this.addCommentStatus = true;
+    },
+
+    requestAddComment(addbelongid) {
+      return postAddComment({
+        courseid: this.id,
+        comment: this.addComment,
+        addbelongid: addbelongid
+      })
+        .then(() => {
+          this.$message({
+            message: "发表追评成功",
+            type: "success"
+          });
+        })
+        .catch(rej => {
+          if (rej.data && rej.data.message) {
+            this.$message({
+              message: rej.data.message,
+              type: "error"
+            });
+          }
+        });
+    },
+
+    requestCanTest() {
+      return getCanTest(this.id).then(data => (this.canTest = data.data.cantest));
     },
 
     order() {

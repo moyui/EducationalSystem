@@ -1,8 +1,7 @@
 from flask import request
 from . import course
-from ..model import CourseGroup, CourseVariety, CourseClassify, CourseInfo, TeacherInfo, TeacherConnect, ConnectType, CourseTag, TagVariety, CourseTime, CourseMenu, UserOrder, VideoInfo
+from ..model import CourseGroup, CourseVariety, CourseClassify, CourseInfo, TeacherInfo, TeacherConnect, ConnectType, CourseTag, TagVariety, CourseTime, CourseMenu, UserOrder, VideoInfo, UserInfo, UserProgress
 from ..router import Response_headers
-from ..model import UserInfo
 from ..decorator import is_login
 
 import json
@@ -136,7 +135,8 @@ def courseView(userid):
                 learningTotal = learningTotal + int(item.buynum)
 
             for item in menu:
-                videoQ = VideoInfo.query.filter_by(menuid=int(item['id'])).all()
+                videoQ = VideoInfo.query.filter_by(
+                    menuid=int(item['id'])).all()
 
                 for videoItem in videoQ:
                     item['video'].append({
@@ -180,5 +180,30 @@ def courseView(userid):
         except Exception as e:
             print(e)
             return Response_headers(500, {})
+    else:
+        return Response_headers(405, {})
+
+
+@course.route('/course/cantest', methods=['GET'])
+@is_login
+def cantest(userid):
+    if request.method == 'GET':
+        id = request.args.get('id')
+        total = 0
+
+        MenuInfo = CourseMenu.query.filter_by(courseid=int(id)).all()
+        for item in MenuInfo:
+            temp = VideoInfo.query.filter_by(menuid=int(item.id)).count()
+            total = total + temp
+
+        Progress = UserProgress.query.filter_by(
+            courseid=int(id), userid=int(userid)).count()
+
+        cantest = False
+        if Progress >= total:
+            cantest = True
+
+        return Response_headers(200, {'status': 1, 'data': {'total': total, 'cantest': cantest}})
+
     else:
         return Response_headers(405, {})

@@ -5,24 +5,25 @@ const URL = {
   REGISTER: '/register'
 };
 
-function postLogin({ phone, password }) {
+function postLogin({ mail, password }) {
   return api({
     method: 'post',
     url: URL.LOGIN,
     data: {
-      phone,
+      mail,
       password
     }
   });
 }
 
-function postRegister({ phone, password }) {
+function postRegister({ mail, password, userName }) {
   return api({
     method: 'post',
     url: URL.REGISTER,
     data: {
-      phone,
-      password
+      mail,
+      password,
+      userName
     }
   });
 }

@@ -79,3 +79,7 @@ insert into VideoInfo values(2, '1620', '三角函数基本概念', 'https://apd
 insert into VideoInfo values(3, '1920', '球体与截面', 'https://apd-9ace46fc8af4584ef6e351ca4db59a22.v.smtcdns.com/vedu.tc.qq.com/Aj5f-KK_ekFHCzzCR6Od02hTDMqkpnsJppHNFafcUifE/i141601wvlh.p701.1.mp4?sdtfrom=v1101&guid=c0ea33e168cbd67da4958d197d96ec3f&vkey=F0EA0BD7F1FC9F1064B9FC00D2203FD9ED7DBE09AE924400532C1A66865E7E1BC1CE9852E349B6EBCB1EB553D466B5ACD4A5056E2F153CD41B88A1D4713C82ECB0E4D30EA09AA533FEACF857CE30F253A373A49296FD906576304A66918083C1FC513909BD0BCA34F6BD61F0DD2E7607', '', 3);
 insert into CommentStatus values(1, '正常');
 insert into CommentStatus values(2, '封禁');
+insert into PayWay values(1, '支付宝');
+insert into PayWay values(2, '微信支付');
+insert into PayWay values(3, '课程分销');
+insert into PayWay values(4, '课程扣款');

@@ -11,7 +11,7 @@
           show-icon
           close-text="知道了"
         ></el-alert>
-         <img src="../../assets/qrcode.png" class="qrcode">
+        <img src="../../assets/qrcode.png" class="qrcode">
       </div>
     </el-main>
     <el-dialog title="阻止收看" :visible.sync="dialogVisible" width="30%">
@@ -25,7 +25,7 @@
 <script>
 import VueDPlayer from "vue-dplayer";
 import "vue-dplayer/dist/vue-dplayer.css";
-import { getVideo } from "./api";
+import { getVideo, postProgress } from "./api";
 
 export default {
   props: ["videoid", "courseid"],
@@ -48,6 +48,7 @@ export default {
   },
   created() {
     this.requestVideo();
+    postProgress({ videoid: this.videoid, courseid: this.courseid });
   },
   methods: {
     requestVideo() {

@@ -12,7 +12,7 @@ class UserGroup(db.Model):
 class UserInfo(db.Model):
     __tablename__ = 'userinfo'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    phone = db.Column(db.String(64), primary_key=True)
+    mail = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(64))
     password = db.Column(db.String(64))
     # 积分
@@ -135,10 +135,10 @@ class CourseComment(db.Model):
     courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
     userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
     createdate = db.Column(db.Text)
+    modifydate = db.Column(db.Text)
     content = db.Column(db.Text)
     coursetime = db.Column(db.Text)
-    add = db.Column(db.Boolean)
-    addbelongid = db.Column(db.Integer)
+    addcontent = db.Column(db.Text)
     status = db.Column(db.Integer, db.ForeignKey('commentstatus.id'))
 
 
@@ -212,16 +212,11 @@ class UserProgress(db.Model):
     __tablename__ = 'userprogress'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     videoid = db.Column(db.Integer, db.ForeignKey('videoinfo.id'))
-    time = db.Column(db.Integer)
-
-
-class UserCollect(db.Model):
-    __tablename__ = 'usercollect'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
     userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
+    courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
 
-# 用户扣款
+
+# 用户扣款表
 
 
 class UserDeposit(db.Model):
@@ -243,6 +238,26 @@ class UserPayment(db.Model):
     orderid = db.Column(db.Integer, db.ForeignKey('userorder.id'))
     amount = db.Column(db.Numeric)
     createdate = db.Column(db.Text)
+
+# 支付方式
+
+
+class PayWay(db.Model):
+    __tablename__ = 'payway'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+
+# 用户余额
+
+
+class RestInfo(db.Model):
+    __tablename__ = 'restinfo'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
+    amount = db.Column(db.Numeric)
+    createdate = db.Column(db.Text)
+    payway = db.Column(db.Integer, db.ForeignKey('payway.id'))
+    distribute = db.Column(db.Integer)
 
 
 class CreditWay(db.Model):
@@ -307,7 +322,7 @@ class VideoCommentSecond(db.Model):
     to = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
 
 
-class Chart(db.Model):
+class Chat(db.Model):
     __tablename__ = 'chart'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))

@@ -16,6 +16,10 @@ export default function() {
         component: () => import('../pages/index/index.vue')
       },
       {
+        path: '/center',
+        component: () => import('../pages/center/index.vue')
+      },
+      {
         path: '/view/:courseid/video/:videoid',
         component: () => import('../pages/video/index.vue'),
         props: true

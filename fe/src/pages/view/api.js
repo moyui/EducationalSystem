@@ -4,7 +4,9 @@ const URL = {
   VIEW: '/course/view',
   ORDER: '/shop/order',
   GETCOMMENT: '/comment/course/get',
-  SENDCOMMENT: '/comment/course/send'
+  SENDCOMMENT: '/comment/course/send',
+  SENDADDCOMMENT: '/comment/course/sendadd',
+  CANTEST: '/course/cantest'
 };
 
 function getView(id) {
@@ -50,4 +52,34 @@ function postComment({ courseid, comment }) {
   });
 }
 
-export { getView, postOrder, getComment, postComment };
+function postAddComment({ courseid, comment, addbelongid }) {
+  return api({
+    url: URL.SENDADDCOMMENT,
+    method: 'post',
+    data: {
+      courseid,
+      comment,
+      isadd: true,
+      addbelongid
+    }
+  });
+}
+
+function getCanTest(id) {
+  return api({
+    url: URL.CANTEST,
+    method: 'get',
+    params: {
+      id
+    }
+  });
+}
+
+export {
+  getView,
+  postOrder,
+  getComment,
+  postComment,
+  postAddComment,
+  getCanTest
+};
