@@ -1,10 +1,12 @@
 from flask import request
 from . import course
-from ..model import CourseGroup, CourseVariety, CourseClassify, CourseInfo, TeacherInfo, TeacherConnect, ConnectType, CourseTag, TagVariety, CourseTime, CourseMenu, UserOrder, VideoInfo, UserInfo, UserProgress
+from ..model import CourseGroup, CourseVariety, CourseClassify, CourseInfo, TeacherInfo, TeacherConnect, ConnectType, CourseTag, TagVariety, CourseTime, CourseMenu, UserOrder, VideoInfo, UserInfo, UserProgress, CourseTest, UserAnswer, UserQualify, UserHoner, HonerType
 from ..router import Response_headers
 from ..decorator import is_login
+from .. import db
 
 import json
+import time
 
 
 @course.route('/course/classify', methods=['GET'])
@@ -187,7 +189,7 @@ def courseView(userid):
 @course.route('/course/cantest', methods=['GET'])
 @is_login
 def cantest(userid):
-    if request.method == 'GET':
+    if request.method == 'GET' and userid is not None:
         id = request.args.get('id')
         total = 0
 
@@ -204,6 +206,188 @@ def cantest(userid):
             cantest = True
 
         return Response_headers(200, {'status': 1, 'data': {'total': total, 'cantest': cantest}})
+
+    else:
+        return Response_headers(405, {})
+
+
+@course.route('/course/table', methods=['GET'])
+@is_login
+def table(userid):
+    if request.method == 'GET':
+        back = []
+        # 用户可用的订单
+        userorder = UserOrder.query.filter_by(userid=userid, statusid=2).all()
+
+        # 订单对应的视频
+        for itemU in userorder:
+
+            courseQ = CourseInfo.query.filter_by(id=itemU.courseid).first()
+
+            video = []
+            videoQ = VideoInfo.query.filter_by(courseid=itemU.courseid).all()
+
+            for itemV in videoQ:
+                videoItem = {}
+                videoItem['id'] = itemV.id
+                videoItem['totaltime'] = itemV.totaltime
+                videoItem['title'] = itemV.title
+
+                # 判断有没有学习过
+                progQ = UserProgress.query.filter_by(
+                    userid=userid, videoid=itemV.id, courseid=itemU.courseid).order_by(UserProgress.id.desc()).first()
+                if progQ is None:
+                    videoItem['isWatch'] = '否'
+                else:
+                    videoItem['isWatch'] = '是'
+
+                video.append(videoItem)
+
+            back.append({
+                'courseid': courseQ.id or '无课程',
+                'coursename': courseQ.name,
+                'video': video
+            })
+
+        return Response_headers(200, {'status': 1, 'data': back})
+
+    else:
+        return Response_headers(405, {})
+
+
+@course.route('/question', methods=['GET'])
+@is_login
+def question(userid):
+    if request.method == 'GET':
+        courseid = int(request.args.get('courseid'))
+        videoid = int(request.args.get('videoid'))
+        typeid = int(request.args.get('type'))
+
+        back = {}
+
+        coursetestQ = CourseTest.query.filter_by(
+            courseid=courseid, typeid=typeid, videoid=videoid).order_by(CourseTest.id.desc()).first()
+
+        back['id'] = coursetestQ.id
+        back['question'] = coursetestQ.question
+        back['choice'] = coursetestQ.choice
+
+        return Response_headers(200, {'status': 1, 'data': back})
+
+    else:
+        return Response_headers(405, {})
+
+
+@course.route('/answer', methods=['POST'])
+@is_login
+def answer(userid):
+    if request.method == 'POST':
+        answer = json.loads(request.get_data().decode("utf-8"))
+        answerG = answer['answer']
+        courseid = int(answer['courseid'])
+        id = int(answer['testid'])
+
+        try:
+
+            coursetestQ = CourseTest.query.filter_by(id=id).first()
+
+            answerQ = coursetestQ.answer
+
+            answerDict = str(answerQ).split('&')
+
+            score = 0
+
+            start = 0
+
+            for item in answerDict:
+
+                itemS = str(item).split(';')
+
+                if str(itemS[0]) == str(answerG[start]):
+                    score = score + int(itemS[1])
+
+                start = start + 1
+
+            back = {
+                'score': score
+            }
+
+            answerA = UserAnswer(
+                userid=int(userid),
+                coursetestid=int(id),
+                courseid=int(courseid),
+                answer='&'.join(answerG),
+                score=str(score)
+            )
+            db.session.add(answerA)
+            db.session.commit()
+
+            if int(score) >= 60:
+                qualifyA = UserQualify(
+                    createdate=str(time.time()),
+                    userid=int(userid),
+                    answerid=(answerA.id)
+                )
+                db.session.add(qualifyA)
+                db.session.commit()
+
+                addhoner('-1', courseid, -1, userid)
+
+            return Response_headers(200, {'status': 1, 'data': back})
+        except Exception as e:
+            print(e)
+            return Response_headers(500, {})
+
+    else:
+        return Response_headers(405, {})
+
+
+def addhoner(typeid, courseid, videoid, userid):
+    if str(typeid) == '-1':
+        # 期末成就
+        userhoner = UserHoner(
+            userid=int(userid),
+            courseid=int(courseid),
+            typeid=1,
+            videoid=-1,
+            createdate=str(time.time())
+        )
+        db.session.add(userhoner)
+        db.session.commit()
+
+
+@course.route('/honer', methods=['GET'])
+@is_login
+def honer(userid):
+    if request.method == 'GET':
+        honertypeQ = HonerType.query.all()
+        courseInfoQ = CourseInfo.query.all()
+
+        honertypeDict = {}
+        courseInfoDict = {}
+
+        honerDict = []
+
+        for item in honertypeQ:
+            honertypeDict[item.id] = item.name
+
+        for item in courseInfoQ:
+            courseInfoDict[item.id] = item.name
+
+        honerQ = UserHoner.query.filter_by(userid=int(userid)).all()
+
+        for item in honerQ:
+            honerDict.append({
+                'honerid': item.id,
+                'courseid': item.courseid,
+                'coursename': courseInfoDict[item.courseid],
+                'typeid': item.typeid,
+                'typename': honertypeDict[item.typeid],
+                'videoid': item.videoid,
+                'createdate': item.createdate
+            })
+
+        return Response_headers(200, {'status': 1, 'data': honerDict})
 
     else:
         return Response_headers(405, {})

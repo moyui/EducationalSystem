@@ -5,12 +5,14 @@
       v-if="group.length > 0"
       class="course__nav"
       @select="selectGroup"
+      text-color="#545c64"
+      active-text-color="#545c64"
     >
-      <el-menu-item v-for="item in group" :key="item.id" :index="item.id.toString()">
-        <span slot="title">{{item.name}}</span>
+      <el-menu-item v-for="item in group" :key="item.id" :index="item.id.toString()" class="nav_li">
+        <span slot="title" class="nav_text">{{item.name}}</span>
       </el-menu-item>
     </el-menu>
-    <el-main>
+    <el-main class="main">
       <el-tabs
         v-model="variteyActiveIndex"
         v-if="showVariety.length > 0"
@@ -38,10 +40,11 @@
               </div>
             </div>
           </template>
-          <div v-else class="no-data">暂无数据</div>
         </el-tab-pane>
       </el-tabs>
-      <div v-else class="no-data">暂无数据</div>
+      <div v-else class="no-data">
+        <span>很抱歉、目前暂无数据</span>
+      </div>
     </el-main>
   </el-container>
 </template>
@@ -91,26 +94,33 @@ export default {
       this.groupActiveIndex = index;
     },
     goToView(id) {
-      this.$router.push({ path: `/view/${id}`});
+      this.$router.push({ path: `/view/${id}` });
     }
   }
 };
 </script>
-<style lang="less">
+<style lang="less" scoped>
 .index {
-  padding: 0 20px;
   height: calc(100% - 60px);
   margin-top: 60px;
   width: 100%;
+  // background-color: #C8E8FF;
 }
 .course__nav {
   margin-top: 20px;
   width: 20%;
+  background-color: #c8e8ff;
 }
 .el-tabs__nav-scroll {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  height: 50px;
+  .el-tabs__item {
+    height: 100%;
+    line-height: 50px;
+    font-size: 16px;
+  }
 }
 .el-tabs__nav-wrap::after {
   content: none;
@@ -121,11 +131,15 @@ export default {
   align-content: flex-start;
   justify-content: space-around;
   .course__unit {
-    width: 20%;
+    width: 28%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+    
     img {
       width: 100%;
     }
@@ -154,8 +168,28 @@ export default {
   }
 }
 .no-data {
+  font-size: 16px;
+  width: 300px;
+  height: 200px;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
+.nav_li {
   text-align: center;
   font-size: 16px;
+  font-weight: 700;
+}
+.nav_li:hover {
+  background: #91d1fe;
+}
+.main {
+  width: calc(100% - 300px);
 }
 </style>
 

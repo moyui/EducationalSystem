@@ -18,7 +18,7 @@
     <el-dialog :append-to-body="true" :visible="rechargeVisible" @close="cancelRecharge">
       <el-form label-width="80px">
         <el-radio-group v-model="recharge.payway">
-          <el-radio v-for="item in payWay" :label="item.id" :key="item.id">{{item.name}}</el-radio>
+          <el-radio v-for="item in payWayShow" :label="item.id" :key="item.id">{{item.name}}</el-radio>
         </el-radio-group>
         <el-form-item label="充值金额">
           <el-input placeholder="请输入充值金额" v-model="recharge.amount"></el-input>
@@ -41,6 +41,7 @@ export default {
       restList: [],
       rechargeVisible: false,
       payWay: [],
+      payWayShow: [],
       recharge: {
         payway: 0,
         amount: 0
@@ -69,6 +70,7 @@ export default {
             message: data.message,
             type: "success"
           });
+          setTimeout(() => window.location.reload(), 2000)
         })
         .catch(rej => {
           this.cancelRecharge();
@@ -85,7 +87,10 @@ export default {
     },
     requestPayWay() {
       return getPayWay()
-        .then(data => (this.payWay = data.payway))
+        .then(data => {
+          this.payWayShow = data.payway.filter(item => item.id < 3)
+          this.payWay = data.payway
+        })
         .catch(rej => {
           this.$message({
             message: rej.data.message,

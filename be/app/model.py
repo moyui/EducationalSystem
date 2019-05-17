@@ -18,9 +18,26 @@ class UserInfo(db.Model):
     # 积分
     credit = db.Column(db.BigInteger)
     # 余额
-    rest = db.Column(db.Numeric)
+    rest = db.Column(db.Numeric(11, 2))
     # 收益
-    income = db.Column(db.Numeric)
+    income = db.Column(db.Numeric(11, 2))
+    phone = db.Column(db.Text)
+
+
+class UserReport(db.Model):
+    __tablename__ = 'userreport'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
+    content = db.Column(db.Text)
+    createdate = db.Column(db.Text)
+
+
+class UserAppeal(db.Model):
+    __tablename__ = 'userappeal'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
+    content = db.Column(db.Text)
+    createdate = db.Column(db.Text)
 
 # 课程信息
 
@@ -36,13 +53,6 @@ class CourseVariety(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(64), unique=True)
     groupid = db.Column(db.Integer, db.ForeignKey('coursegroup.id'))
-
-
-# 课程状态
-class CourseStatus(db.Model):
-    __tablename__ = 'coursestatus'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(64), unique=True)
 
 # 教师信息
 
@@ -76,7 +86,7 @@ class CourseInfo(db.Model):
     name = db.Column(db.Text)
     info = db.Column(db.Text)
     extrainfo = db.Column(db.Text)
-    price = db.Column(db.Numeric)
+    price = db.Column(db.Numeric(11, 2))
     teacherid = db.Column(db.Integer, db.ForeignKey('teacherinfo.id'))
     # 订阅人数
     buynum = db.Column(db.BigInteger)
@@ -149,6 +159,7 @@ class VideoInfo(db.Model):
     title = db.Column(db.Text)
     url = db.Column(db.Text)
     picurl = db.Column(db.Text)
+    courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
     menuid = db.Column(db.Integer, db.ForeignKey('coursemenu.id'))
 
 
@@ -163,22 +174,47 @@ class CourseWareInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     url = db.Column(db.Text)
     createdate = db.Column(db.Text)
-    typeid = db.Column(db.Integer)
+    videoid = db.Column(db.Integer, db.ForeignKey('videoinfo.id'))
+    typeid = db.Column(db.Integer, db.ForeignKey('coursewaretype.id'))
+
+# 课程测试类型
+class TestType(db.Model):
+    __tablename__ = 'testtype'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text)
 
 
-class Coupon(db.Model):
-    __tablename__ = 'coupon'
+class CourseTest(db.Model):
+    __tablename__ = 'coursetest'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(64))
-    typeid = db.Column(db.Integer)
-
-# 缺少优惠券类型
+    question = db.Column(db.Text)
+    choice = db.Column(db.Text)
+    answer = db.Column(db.Text)
+    courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
+    typeid = db.Column(db.Integer, db.ForeignKey('testtype.id'))
+    videoid = db.Column(db.Integer)
 
 
 class OrderStatus(db.Model):
     __tablename__ = 'orderstatus'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(64))
+
+
+#  用户成就 
+class HonerType(db.Model):
+    __tablename__ = 'honertype'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(64))
+
+class UserHoner(db.Model):
+    __tablename__ = 'userhoner'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
+    typeid = db.Column(db.Integer, db.ForeignKey('honertype.id'))
+    videoid = db.Column(db.Integer)
+    createdate = db.Column(db.Text)
+    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
 
 # 用户课程相关
 
@@ -206,16 +242,6 @@ class UserAward(db.Model):
     typeid = db.Column(db.Integer, db.ForeignKey('awardtype.id'))
     createdate = db.Column(db.Text)
 
-
-# 用户学习进度（对应每个视频）
-class UserProgress(db.Model):
-    __tablename__ = 'userprogress'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    videoid = db.Column(db.Integer, db.ForeignKey('videoinfo.id'))
-    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
-    courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
-
-
 # 用户扣款表
 
 
@@ -223,21 +249,10 @@ class UserDeposit(db.Model):
     __tablename__ = 'userdeposit'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
-    amount = db.Column(db.Numeric)
+    amount = db.Column(db.Numeric(11, 2))
     createdate = db.Column(db.Text)
     fromid = db.Column(db.Integer)
 
-# 用户支付
-
-
-class UserPayment(db.Model):
-    __tablename__ = 'userpayment'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
-    # 订单号
-    orderid = db.Column(db.Integer, db.ForeignKey('userorder.id'))
-    amount = db.Column(db.Numeric)
-    createdate = db.Column(db.Text)
 
 # 支付方式
 
@@ -254,27 +269,41 @@ class RestInfo(db.Model):
     __tablename__ = 'restinfo'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
-    amount = db.Column(db.Numeric)
+    amount = db.Column(db.Numeric(11, 2))
     createdate = db.Column(db.Text)
     payway = db.Column(db.Integer, db.ForeignKey('payway.id'))
     distribute = db.Column(db.Integer)
 
-
-class CreditWay(db.Model):
-    __tablename__ = 'creditway'
+# 用户学习进度（对应每个视频）
+class UserProgress(db.Model):
+    __tablename__ = 'userprogress'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    way = db.Column(db.String(64), unique=True)
+    videoid = db.Column(db.Integer, db.ForeignKey('videoinfo.id'))
+    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
+    courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
 
 
-class UserCredit(db.Model):
-    __tablename__ = 'usercredit'
+# 用户答案表
+class UserAnswer(db.Model):
+    __tablename__ = 'useranswer'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
-    wayid = db.Column(db.Integer, db.ForeignKey('creditway.id'))
-    amount = db.Column(db.BigInteger)
+    courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
+    coursetestid = db.Column(db.Integer, db.ForeignKey('coursetest.id'))
+    answer = db.Column(db.Text)
+    score = db.Column(db.Text)
+
+
+# 用户成绩合格记录表
+class UserQualify(db.Model):
+    __tablename__ = 'userqualify'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
+    answerid = db.Column(db.Integer, db.ForeignKey('useranswer.id'))
     createdate = db.Column(db.Text)
 
-# 用户帮助推广机制
+
+    # 用户帮助推广机制
 
 
 class UserDistribution(db.Model):
@@ -282,8 +311,9 @@ class UserDistribution(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
     courseid = db.Column(db.Integer, db.ForeignKey('courseinfo.id'))
-    radio = db.Column(db.Numeric)
+    radio = db.Column(db.Numeric(11, 2))
     link = db.Column(db.Text)
+    isopen = db.Column(db.Boolean)
 
 
 class UserDistributionDetail(db.Model):
@@ -292,8 +322,8 @@ class UserDistributionDetail(db.Model):
     distributioniod = db.Column(
         db.Integer, db.ForeignKey('userdistribution.id'))
     orderid = db.Column(db.Integer, db.ForeignKey('userorder.id'))
-    income = db.Column(db.Numeric)
-    status = db.Column(db.Integer, db.ForeignKey('coursestatus.id'))
+    userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
+    income = db.Column(db.Numeric(11, 2))
 
 
 # 用学习进度表计算
@@ -302,7 +332,7 @@ class UserWithDrawMoney(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('userinfo.id'))
     orderid = db.Column(db.Integer, db.ForeignKey('userorder.id'))
-    money = db.Column(db.Numeric)
+    money = db.Column(db.Numeric(11, 2))
 
 
 class VideoComment(db.Model):

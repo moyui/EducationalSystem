@@ -1,7 +1,9 @@
 import api from '../../api';
 
 const URL = {
-  ORDERLIST: '/orderList'
+  ORDERLIST: '/orderList',
+  DISTRIBUTE: '/distribution',
+  WITHDRAW: '/withdraw'
 };
 
 function getOrderList() {
@@ -11,4 +13,24 @@ function getOrderList() {
   });
 }
 
-export { getOrderList };
+function distribute(id) {
+  return api({
+    url: URL.DISTRIBUTE,
+    method: 'post',
+    data: {
+      id
+    }
+  });
+}
+
+function withdraw(id) {
+  return api({
+    url: URL.WITHDRAW,
+    method: 'post',
+    data: {
+      id
+    }
+  });
+}
+
+export { getOrderList, distribute, withdraw };

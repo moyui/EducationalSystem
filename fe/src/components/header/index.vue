@@ -1,6 +1,13 @@
 <template>
   <el-header class="header">
-    <el-menu mode="horizontal" :default-active="activeIndex">
+    <el-menu
+      mode="horizontal"
+      :default-active="activeIndex"
+      background-color="#545c64"
+      text-color="#fff"
+      active-text-color="#fff"
+      class="menu"
+    >
       <el-menu-item index="0">
         <router-link to="/" slot="title">
           <span>在线教育系统</span>
@@ -11,7 +18,7 @@
         <span slot="title">登录</span>
       </el-menu-item>
       <el-submenu v-else index="2" class="nav__login">
-        <template slot="title">{{getUserName}}</template>
+        <template slot="title">{{userName || '未知'}}</template>
         <el-menu-item index="2-1" @click="toUserCenter">个人中心</el-menu-item>
         <el-menu-item index="2-2" @click="activeReport">举报用户</el-menu-item>
         <el-menu-item index="2-3" class="nav__login_out" @click="logout">退出登录</el-menu-item>
@@ -44,6 +51,7 @@
 </template>
 <script>
 import Cookie from "js-cookie";
+import { getUserInfo } from "./api";
 
 export default {
   data() {
@@ -54,19 +62,21 @@ export default {
         userName: "",
         reason: ""
       },
-      reportVisible: false
+      reportVisible: false,
+      userName: ""
     };
   },
   created() {
-    if (Cookie.get("userid")) this.$store.commit("SET_LOGIN", true);
+    if (Cookie.get("userid")) {
+      this.$store.commit("SET_LOGIN", true);
+      getUserInfo().then(data => (this.userName = data.data.name));
+    }
   },
   computed: {
     isLogin() {
       return this.$store.state.login;
     },
-    getUserName() {
-      return Cookie.get("username") || "未知生物";
-    },
+    getUserName() {},
     loginVisible() {
       return this.$store.state.loginVisible;
     },
@@ -77,7 +87,6 @@ export default {
   methods: {
     logout() {
       Cookie.remove("userid");
-      Cookie.remove("username");
       window.location.reload();
     },
     activeLogin() {
@@ -105,6 +114,7 @@ export default {
   right: 0;
   top: 0;
   z-index: 1;
+  padding: 0 0;
 }
 .nav__login {
   float: right;
@@ -114,6 +124,26 @@ export default {
 }
 .dialog {
   z-index: 3000;
+}
+.menu {
+  height: 80px;
+  padding: 0 0;
+  .el-menu-item,
+  .el-submenu {
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+  }
+  .el-submenu__title {
+    height: 100%;
+  }
+  .el-menu-item:first-child {
+    width: 20%;
+    display: inline-flex;
+    justify-content: center;
+    align-self: center;
+  }
 }
 </style>
 

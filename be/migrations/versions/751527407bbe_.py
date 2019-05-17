@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: b8444a8f0ba9
+Revision ID: 751527407bbe
 Revises: 
-Create Date: 2019-05-10 05:04:37.680666
+Create Date: 2019-05-17 14:15:42.261794
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b8444a8f0ba9'
+revision = '751527407bbe'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,30 +36,11 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.create_table('coupon',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(length=64), nullable=True),
-    sa.Column('typeid', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('coursegroup',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
-    )
-    op.create_table('coursestatus',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(length=64), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
-    )
-    op.create_table('coursewareinfo',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('url', sa.Text(), nullable=True),
-    sa.Column('createdate', sa.Text(), nullable=True),
-    sa.Column('typeid', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('coursewaretype',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -67,11 +48,10 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.create_table('creditway',
+    op.create_table('honertype',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('way', sa.String(length=64), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('way')
+    sa.Column('name', sa.String(length=64), nullable=True),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('orderstatus',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -98,6 +78,11 @@ def upgrade():
     sa.Column('favor', sa.Float(), nullable=True),
     sa.PrimaryKeyConstraint('id', 'phone')
     )
+    op.create_table('testtype',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Text(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('usergroup',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
@@ -109,8 +94,9 @@ def upgrade():
     sa.Column('name', sa.String(length=64), nullable=True),
     sa.Column('password', sa.String(length=64), nullable=True),
     sa.Column('credit', sa.BigInteger(), nullable=True),
-    sa.Column('rest', sa.Numeric(), nullable=True),
-    sa.Column('income', sa.Numeric(), nullable=True),
+    sa.Column('rest', sa.Numeric(precision=11, scale=2), nullable=True),
+    sa.Column('income', sa.Numeric(precision=11, scale=2), nullable=True),
+    sa.Column('phone', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id', 'mail')
     )
     op.create_table('chart',
@@ -128,7 +114,7 @@ def upgrade():
     sa.Column('name', sa.Text(), nullable=True),
     sa.Column('info', sa.Text(), nullable=True),
     sa.Column('extrainfo', sa.Text(), nullable=True),
-    sa.Column('price', sa.Numeric(), nullable=True),
+    sa.Column('price', sa.Numeric(precision=11, scale=2), nullable=True),
     sa.Column('teacherid', sa.Integer(), nullable=True),
     sa.Column('buynum', sa.BigInteger(), nullable=True),
     sa.Column('favour', sa.Float(), nullable=True),
@@ -148,7 +134,7 @@ def upgrade():
     op.create_table('restinfo',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('userid', sa.Integer(), nullable=True),
-    sa.Column('amount', sa.Numeric(), nullable=True),
+    sa.Column('amount', sa.Numeric(precision=11, scale=2), nullable=True),
     sa.Column('createdate', sa.Text(), nullable=True),
     sa.Column('payway', sa.Integer(), nullable=True),
     sa.Column('distribute', sa.Integer(), nullable=True),
@@ -165,6 +151,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['typeid'], ['connecttype.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('userappeal',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('userid', sa.Integer(), nullable=True),
+    sa.Column('content', sa.Text(), nullable=True),
+    sa.Column('createdate', sa.Text(), nullable=True),
+    sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('useraward',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('typeid', sa.Integer(), nullable=True),
@@ -172,22 +166,20 @@ def upgrade():
     sa.ForeignKeyConstraint(['typeid'], ['awardtype.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('usercredit',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('userid', sa.Integer(), nullable=True),
-    sa.Column('wayid', sa.Integer(), nullable=True),
-    sa.Column('amount', sa.BigInteger(), nullable=True),
-    sa.Column('createdate', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
-    sa.ForeignKeyConstraint(['wayid'], ['creditway.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('userdeposit',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('userid', sa.Integer(), nullable=True),
-    sa.Column('amount', sa.Numeric(), nullable=True),
+    sa.Column('amount', sa.Numeric(precision=11, scale=2), nullable=True),
     sa.Column('createdate', sa.Text(), nullable=True),
     sa.Column('fromid', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('userreport',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('userid', sa.Integer(), nullable=True),
+    sa.Column('content', sa.Text(), nullable=True),
+    sa.Column('createdate', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -229,6 +221,18 @@ def upgrade():
     sa.ForeignKeyConstraint(['tagid'], ['tagvariety.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('coursetest',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('question', sa.Text(), nullable=True),
+    sa.Column('choice', sa.Text(), nullable=True),
+    sa.Column('answer', sa.Text(), nullable=True),
+    sa.Column('courseid', sa.Integer(), nullable=True),
+    sa.Column('typeid', sa.Integer(), nullable=True),
+    sa.Column('videoid', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['courseid'], ['courseinfo.id'], ),
+    sa.ForeignKeyConstraint(['typeid'], ['testtype.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('coursetime',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('courseid', sa.Integer(), nullable=True),
@@ -240,9 +244,22 @@ def upgrade():
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('userid', sa.Integer(), nullable=True),
     sa.Column('courseid', sa.Integer(), nullable=True),
-    sa.Column('radio', sa.Numeric(), nullable=True),
+    sa.Column('radio', sa.Numeric(precision=11, scale=2), nullable=True),
     sa.Column('link', sa.Text(), nullable=True),
+    sa.Column('isopen', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['courseid'], ['courseinfo.id'], ),
+    sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('userhoner',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('courseid', sa.Integer(), nullable=True),
+    sa.Column('typeid', sa.Integer(), nullable=True),
+    sa.Column('videoid', sa.Integer(), nullable=True),
+    sa.Column('createdate', sa.Text(), nullable=True),
+    sa.Column('userid', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['courseid'], ['courseinfo.id'], ),
+    sa.ForeignKeyConstraint(['typeid'], ['honertype.id'], ),
     sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -258,22 +275,34 @@ def upgrade():
     sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('useranswer',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('userid', sa.Integer(), nullable=True),
+    sa.Column('courseid', sa.Integer(), nullable=True),
+    sa.Column('coursetestid', sa.Integer(), nullable=True),
+    sa.Column('answer', sa.Text(), nullable=True),
+    sa.Column('score', sa.Text(), nullable=True),
+    sa.ForeignKeyConstraint(['courseid'], ['courseinfo.id'], ),
+    sa.ForeignKeyConstraint(['coursetestid'], ['coursetest.id'], ),
+    sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('userdistributiondetail',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('distributioniod', sa.Integer(), nullable=True),
     sa.Column('orderid', sa.Integer(), nullable=True),
-    sa.Column('income', sa.Numeric(), nullable=True),
-    sa.Column('status', sa.Integer(), nullable=True),
+    sa.Column('userid', sa.Integer(), nullable=True),
+    sa.Column('income', sa.Numeric(precision=11, scale=2), nullable=True),
     sa.ForeignKeyConstraint(['distributioniod'], ['userdistribution.id'], ),
     sa.ForeignKeyConstraint(['orderid'], ['userorder.id'], ),
-    sa.ForeignKeyConstraint(['status'], ['coursestatus.id'], ),
+    sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('userpayment',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('userid', sa.Integer(), nullable=True),
     sa.Column('orderid', sa.Integer(), nullable=True),
-    sa.Column('amount', sa.Numeric(), nullable=True),
+    sa.Column('amount', sa.Numeric(precision=11, scale=2), nullable=True),
     sa.Column('createdate', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['orderid'], ['userorder.id'], ),
     sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
@@ -283,7 +312,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('userid', sa.Integer(), nullable=True),
     sa.Column('orderid', sa.Integer(), nullable=True),
-    sa.Column('money', sa.Numeric(), nullable=True),
+    sa.Column('money', sa.Numeric(precision=11, scale=2), nullable=True),
     sa.ForeignKeyConstraint(['orderid'], ['userorder.id'], ),
     sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -294,8 +323,20 @@ def upgrade():
     sa.Column('title', sa.Text(), nullable=True),
     sa.Column('url', sa.Text(), nullable=True),
     sa.Column('picurl', sa.Text(), nullable=True),
+    sa.Column('courseid', sa.Integer(), nullable=True),
     sa.Column('menuid', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['courseid'], ['courseinfo.id'], ),
     sa.ForeignKeyConstraint(['menuid'], ['coursemenu.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('coursewareinfo',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('url', sa.Text(), nullable=True),
+    sa.Column('createdate', sa.Text(), nullable=True),
+    sa.Column('videoid', sa.Integer(), nullable=True),
+    sa.Column('typeid', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['typeid'], ['coursewaretype.id'], ),
+    sa.ForeignKeyConstraint(['videoid'], ['videoinfo.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('userprogress',
@@ -306,6 +347,15 @@ def upgrade():
     sa.ForeignKeyConstraint(['courseid'], ['courseinfo.id'], ),
     sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
     sa.ForeignKeyConstraint(['videoid'], ['videoinfo.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('userqualify',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('userid', sa.Integer(), nullable=True),
+    sa.Column('answerid', sa.Integer(), nullable=True),
+    sa.Column('createdate', sa.Text(), nullable=True),
+    sa.ForeignKeyConstraint(['answerid'], ['useranswer.id'], ),
+    sa.ForeignKeyConstraint(['userid'], ['userinfo.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('videocomment',
@@ -336,21 +386,27 @@ def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('videocommentsecond')
     op.drop_table('videocomment')
+    op.drop_table('userqualify')
     op.drop_table('userprogress')
+    op.drop_table('coursewareinfo')
     op.drop_table('videoinfo')
     op.drop_table('userwidthdrawal')
     op.drop_table('userpayment')
     op.drop_table('userdistributiondetail')
+    op.drop_table('useranswer')
     op.drop_table('userorder')
+    op.drop_table('userhoner')
     op.drop_table('userdistribution')
     op.drop_table('coursetime')
+    op.drop_table('coursetest')
     op.drop_table('coursetag')
     op.drop_table('coursemenu')
     op.drop_table('coursecomment')
     op.drop_table('courseclassify')
+    op.drop_table('userreport')
     op.drop_table('userdeposit')
-    op.drop_table('usercredit')
     op.drop_table('useraward')
+    op.drop_table('userappeal')
     op.drop_table('teacherconnect')
     op.drop_table('restinfo')
     op.drop_table('coursevariety')
@@ -358,16 +414,14 @@ def downgrade():
     op.drop_table('chart')
     op.drop_table('userinfo')
     op.drop_table('usergroup')
+    op.drop_table('testtype')
     op.drop_table('teacherinfo')
     op.drop_table('tagvariety')
     op.drop_table('payway')
     op.drop_table('orderstatus')
-    op.drop_table('creditway')
+    op.drop_table('honertype')
     op.drop_table('coursewaretype')
-    op.drop_table('coursewareinfo')
-    op.drop_table('coursestatus')
     op.drop_table('coursegroup')
-    op.drop_table('coupon')
     op.drop_table('connecttype')
     op.drop_table('commentstatus')
     op.drop_table('awardtype')

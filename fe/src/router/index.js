@@ -32,6 +32,10 @@ export default function() {
       {
         path: '/payment',
         component: () => import('../pages/payment/index.vue')
+      },{
+        path: '/test/:courseid/:videoid',
+        component: () => import('../pages/test/index.vue'),
+        props: true
       }
     ]
   });

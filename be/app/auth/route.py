@@ -22,7 +22,6 @@ def login():
         if user and user.password == password:
             resp = Response_headers(200, {'status': 1})
             resp.set_cookie('userid', str(user.id))
-            resp.set_cookie('username', str(user.name))
         else:
             resp = Response_headers(200, {'status': 0})
         return resp
@@ -53,7 +52,8 @@ def register():
                     name=str(name),
                     credit=0,
                     rest=0,
-                    income=0
+                    income=0,
+                    phone=''
                 )
                 db.session.add(user)
                 db.session.commit()
@@ -83,9 +83,33 @@ def userinfo(userid):
                                           'name': userinfo.name,
                                           'credit': userinfo.credit,
                                           'rest':  "%.2f" % userinfo.rest,
-                                          'income': "%.2f" % userinfo.income
+                                          'income': "%.2f" % userinfo.income,
+                                          'phone': userinfo.phone
                                           }
                                          })
+            except Exception as e:
+                print(e)
+                return Response_headers(500, {'status': 0, 'message': '用户名无效或服务器暂时不可用'})
+        else:
+            return Response_headers(401, {'status': 2, 'message': '您尚未登录，请您先登录'})
+    else:
+        return Response_headers(405, {'status': 0})
+
+
+@auth.route('/phone', methods=['POST'])
+@is_login
+def addPhone(userid):
+    if request.method == 'POST':
+        if userid is not None:
+            userinfo = json.loads(request.get_data().decode("utf-8"))
+            phone = userinfo['phone']
+            try:
+                userinfoQ = UserInfo.query.filter_by(
+                    id=int(userid)).first()
+                userinfoQ.phone = str(phone)
+                db.session.commit()
+                resp = Response_headers(201, {'status': 1, 'message': '手机号添加成功'})
+                return resp
             except Exception as e:
                 print(e)
                 return Response_headers(500, {'status': 0, 'message': '用户名无效或服务器暂时不可用'})

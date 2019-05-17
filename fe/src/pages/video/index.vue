@@ -48,7 +48,6 @@ export default {
   },
   created() {
     this.requestVideo();
-    postProgress({ videoid: this.videoid, courseid: this.courseid });
   },
   methods: {
     requestVideo() {
@@ -60,6 +59,9 @@ export default {
           };
           this.videoVisible = true;
         })
+        .then(() =>
+          postProgress({ videoid: this.videoid, courseid: this.courseid })
+        )
         .catch(rej => {
           if (rej.data && rej.data.message) {
             this.$message({

@@ -6,7 +6,7 @@
       <el-breadcrumb-item>{{view.basic.name}}</el-breadcrumb-item>
     </el-breadcrumb>
     <div class="view__header">
-      <img v-if="view.basic.logo" :src="view.basic.logo">
+      <img v-if="view.basic.logo" :src="view.basic.logo" class="view__header-logo">
       <div class="view__header_meta">
         <div class="view__title-wrap">
           <h3 class="view__title">{{view.basic.name}}</h3>
@@ -14,7 +14,6 @@
         </div>
         <div class="view__buy">
           <span>购买人数：{{view.basic.total}}人</span>
-          <span class="view__favour">好评度：{{favourRate}}</span>
           <!-- <el-button class="view__favour el-icon-star-off" size="small">收藏</el-button> -->
         </div>
         <p class="view__info">{{view.basic.info}}</p>
@@ -31,16 +30,12 @@
             plain
             @click="goToVideo(view.detail.menu[0].video[0].id, view.basic.id)"
           >学习课程</el-button>
-          <el-button
-            v-if="canTest"
-            type="warning"
-            plain
-            @click="goToVideo(view.detail.menu[0].video[0].id, view.basic.id)"
-          >开始测试</el-button>
+          <el-button v-if="canTest" type="warning" plain @click="goToTest(view.basic.id)">开始测试</el-button>
           <el-button>咨询</el-button>
         </div>
       </div>
     </div>
+    <el-divider></el-divider>
     <div class="view__detail">
       <el-tabs v-model="activeIndex" class="view__tabs" tab-position="left">
         <el-tab-pane label="目录" name="1">
@@ -136,12 +131,6 @@
         <el-row>
           <el-col :span="8">
             <div class="teacher__meta">
-              <p>好评度</p>
-              <span>{{favourRate}}</span>
-            </div>
-          </el-col>
-          <el-col :span="8">
-            <div class="teacher__meta">
               <p>课程数</p>
               <span>{{view.teacher.has_total}}</span>
             </div>
@@ -174,7 +163,6 @@ import {
   postAddComment,
   getCanTest
 } from "./api";
-import { setTimeout } from "timers";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
@@ -311,7 +299,9 @@ export default {
     },
 
     requestCanTest() {
-      return getCanTest(this.id).then(data => (this.canTest = data.data.cantest));
+      return getCanTest(this.id).then(
+        data => (this.canTest = data.data.cantest)
+      );
     },
 
     order() {
@@ -350,6 +340,11 @@ export default {
       });
       window.open(href, "_blank");
     },
+    goToTest(courseid) {
+      this.$router.push({
+        path: `/test/${courseid}/-1`
+      });
+    },
     sToHs(s) {
       var h;
       h = Math.floor(s / 60);
@@ -372,19 +367,22 @@ export default {
   }
 };
 </script>
-<style lang="less" scope>
+<style lang="less" scoped>
 .view {
   width: 100%;
   margin-top: 60px;
-  padding: 20px 40px;
+  padding: 40px 60px;
   margin-bottom: 60px;
   .view__header {
     display: flex;
     flex-direction: row;
     margin-top: 20px;
+    background-color: #f4f4f4;
+    padding: 20px;
     img {
       width: 600px;
       height: 338px;
+      border-radius: 50px;
     }
     .view__header_meta {
       display: flex;
@@ -441,6 +439,14 @@ export default {
     width: 100%;
     .view__tabs {
       width: 70%;
+      .nav_li {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .nav_li:hover {
+        background: #91d1fe;
+      }
     }
     .view__card {
       flex: 1;
@@ -545,6 +551,12 @@ export default {
       text-align: right;
     }
   }
+}
+.el-divider {
+  height: 2px;
+}
+.el-tabs__nav-wrap {
+  height: 60px;
 }
 </style>
 

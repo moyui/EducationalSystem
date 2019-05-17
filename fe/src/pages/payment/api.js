@@ -4,13 +4,14 @@ const URL = {
   PURCHASE: '/shop/purchase'
 };
 
-function postPurchase(id) {
+function postPurchase(id, link) {
   return api({
     url: URL.PURCHASE,
     method: 'post',
     data: {
       id,
-      payway: 2
+      payway: 2,
+      link
     }
   });
 }

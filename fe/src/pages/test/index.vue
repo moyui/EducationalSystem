@@ -1,58 +1,89 @@
 <template>
-  <el-container class="center" direction="vertical">
-    <h3 class="title">您好，{{getUserName}}学员</h3>
-    <el-container>
-      <el-aside>
-        <el-menu :default-active="activeIndex" @select="changeIndex">
-          <el-menu-item index="1">个人信息</el-menu-item>
-          <el-menu-item index="2">课程表</el-menu-item>
-          <el-menu-item index="3">全部订单</el-menu-item>
-          <el-menu-item index="4">我的余额</el-menu-item>
-          <el-menu-item index="5">课程分销</el-menu-item>
-        </el-menu>
-      </el-aside>
-      <el-main>
-        <UserInfo v-if="activeIndex == '1'"/>
-        <Recharge v-if="activeIndex == '4'"/>
-        <Order v-if="activeIndex == '3'"/>
-      </el-main>
-    </el-container>
+  <el-container class="test" direction="vertical">
+    <h2 class="title">期末测试</h2>
+    <el-form>
+      <el-form-item label="题目一">
+        <p>问xxxxxxxx?</p>
+        <el-radio-group v-model="answer[0]">
+          <el-radio label="A">A</el-radio>
+          <el-radio label="B">B</el-radio>
+          <el-radio label="C">C</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="题目二">
+        <p>问xxxxxxxx?</p>
+        <el-input
+          type="textarea"
+          placeholder="请填写答案一"
+          :autosize="{ minRows: 4, maxRows: 10 }"
+          v-model="answer[1]"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="题目三">
+        <p>问xxxxxxxx?</p>
+        <el-input
+          type="textarea"
+          placeholder="请填写答案二"
+          :autosize="{ minRows: 4, maxRows: 10 }"
+          v-model="answer[2]"
+        ></el-input>
+      </el-form-item>
+    </el-form>
+    <el-button type="primary" class="submit" @click="submitAnswer">提 交</el-button>
+    <el-dialog :append-to-body="true" :visible="scoreAcvivity" @close="close">
+      <h3>您的成绩是：</h3>
+      <h2><em>{{score}}</em></h2>
+      <p v-if="score > 60">恭喜您获得该课程的成就！请前往个人中心查看</p>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="close">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-container>
 </template>
 <script>
 import Cookie from "js-cookie";
-
-const UserInfo = () => import("../../components/userinfo/index.vue");
-const Recharge = () => import("../../components/recharge/index.vue");
-const Order = () => import("../../components/order/index.vue");
+import { postAnswer, getQuestion } from "./api.js";
 
 export default {
-  components: { UserInfo, Recharge, Order },
+  props: ["courseid", "videoid"],
   data() {
     return {
-      activeIndex: "1"
+      id: "",
+      answer: [],
+      scoreAcvivity: false,
+      score: ""
     };
   },
-  computed: {
-    getUserName() {
-      return Cookie.get("username") || "未知生物";
-    }
+  created() {
+    getQuestion(this.courseid, "-1", this.videoid).then(
+      res => (this.id = res.data.id)
+    );
+  },
+  destroyed() {
+    this.submitAnswer();
   },
   methods: {
-    changeIndex(index) {
-      this.activeIndex = index;
+    submitAnswer() {
+      return postAnswer(this.courseid, this.id, this.answer).then(res => {
+        this.score = res.data.score;
+        this.scoreAcvivity = true;
+      });
+    },
+    close() {
+      this.scoreAcvivity = false;
+      this.$router.push('/center')
     }
   }
 };
 </script>
-<style lang="less">
-.center {
-  padding: 0 20px;
+<style lang="less" scoped>
+.title {
+  margin-top: 10px;
+}
+.test {
+  padding: 0 500px;
   height: calc(100% - 60px);
   margin-top: 60px;
   width: 100%;
-  .title {
-    display: block;
-  }
 }
 </style>

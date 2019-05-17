@@ -13,6 +13,11 @@
         <i class="purchase__price-unit">￥</i>
         <i class="purchase__price-num">{{price}}</i>
       </p>
+      <el-form label-width="120px" class="fen">
+        <el-form-item label="课程分销代码：">
+          <el-input v-model="link" placeholder="请输入分销代码，无就忽略"></el-input>
+        </el-form-item>
+      </el-form>
     </div>
     <div slot="footer" class="dialog-footer">
       <el-button @click="cancel">取 消</el-button>
@@ -24,6 +29,11 @@
 import { postPurchase } from "./api";
 
 export default {
+  data() {
+    return {
+      link: ""
+    };
+  },
   computed: {
     id() {
       return this.$store.state.order.id || 0;
@@ -49,7 +59,7 @@ export default {
       this.$store.commit("SET_ORDER_VISIBLE", false);
     },
     confirm() {
-      return postPurchase(this.id)
+      return postPurchase(this.id, this.link)
         .then(data => {
           this.$message({
             message: data.message,
@@ -61,6 +71,7 @@ export default {
           this.$store.commit("SET_ORDER_VISIBLE", false);
           // 跳转支付单独页
           if (rej.data.status == 3) {
+            localStorage.setItem('link', this.link);
             this.$router.push({ path: "/payment" });
           } else {
             this.$message({
@@ -111,5 +122,8 @@ export default {
     font-size: 30px;
     font-style: normal;
   }
+}
+.fen {
+  margin-top: 20px;
 }
 </style>
